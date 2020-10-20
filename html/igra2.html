@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CARDS Emir Karaman</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="../css/igra2.css">
+    </head>
+    <body onload="kreirajTablu()" class="d-flex flex-row">
+        <div id="main">
+            <div id="labele">
+                <div>
+                    <button class="signal" id="button1"></button>
+                    <label id="label1">Igrac A</label>
+                </div>
+                <div>
+                    <button class="signal" id="button2"></button>
+                    <label>Igrac B</label>
+                </div>
+            </div>
+            <div class="mb-3" id="rezultati">
+                <input type="text" id="igrac1text" readonly>
+                <input type="text" id="igrac2text" readonly>
+            </div>
+            <div id="tabla" class="mb-5">
+            </div>
+        </div>
+
+        <script>
+            var sumaIgracA = sumaIgracB = brojacZavrsenihIgri = 0, naReduJe = true;
+            var matVrijednosti = Array(5).fill().map(() => Array(5).fill(0));
+            var matbrojacaPonavljanja = Array(5).fill().map(() => Array(5).fill(0));
+            document.getElementById('button1').style.backgroundColor='green';
+            setInterval(() => {
+                if (sumaIgracA >= 50 || sumaIgracB >= 50) {
+                    var button1 = document.getElementById('button1');
+                    var button2 = document.getElementById('button2');
+                    brojacZavrsenihIgri++;
+                    if (sumaIgracA > sumaIgracB)    {
+                        document.getElementById('igrac1text').value = 'Pobjeda !!';
+                    }
+                    else{
+                        document.getElementById('igrac2text').value = 'Pobjeda !!';
+                    }                           
+                    sumaIgracA = sumaIgracB = 0;
+                    if (brojacZavrsenihIgri % 2 == 0)   {
+                        naReduJe = true;    button1.style.backgroundColor='green';
+                                            button2.style.backgroundColor='white';
+                    }
+                    else {
+                        naReduJe = false;   button1.style.backgroundColor='white';
+                                            button2.style.backgroundColor='green';
+                    }                             
+                    matbrojacaPonavljanja = Array(5).fill().map(() => Array(5).fill(0));
+                    matVrijednosti = Array(5).fill().map(() => Array(5).fill(0));
+                    generisanjeMatriceVrijednosti();
+                    setTimeout(() => {
+                        var odgovor = confirm('Zelite li novu igru?');
+                        if (!odgovor) window.location.href="pocetna.html";
+                    }, 2000);
+                }
+            }, 1000);
+
+            function generisanjeMatriceVrijednosti() 
+            {
+                let brojacLjutko = 0,brojacSmjesko = 0,brojacOstalih = 0;
+                while (true) {
+                    let i = Math.floor(Math.random() * 5); 
+                    let j = Math.floor(Math.random() * 5);
+                    if (matVrijednosti[i][j] == 0) {
+                        matVrijednosti[i][j] = 12;
+                        brojacLjutko++;
+                    }
+                    if (brojacLjutko > 3) break;
+                }
+                while (true) {
+                    let i = Math.floor(Math.random() * 5);
+                    let j = Math.floor(Math.random() * 5);
+                    if (matVrijednosti[i][j] == 0) {
+                        matVrijednosti[i][j] = 11;
+                        brojacSmjesko++;
+                    }
+                    if (brojacSmjesko > 3) break;
+                }
+                while (true) {
+                    let i = Math.floor(Math.random() * 5);
+                    let j = Math.floor(Math.random() * 5);
+                    if (matVrijednosti[i][j] == 0) {
+                        matVrijednosti[i][j] = Math.floor(Math.random() * 10) + 1;
+                        brojacOstalih++;
+                    }
+                    if (brojacOstalih > 16) break;
+                }
+            }
+
+            function kreirajTablu() {
+                generisanjeMatriceVrijednosti();
+                var div = document.getElementById('tabla');
+                for (var i = 0; i < 5; i++) {
+                    for (var j = 0; j < 5; j++) {
+                        var buton = document.createElement('BUTTON');
+                        buton.id = '' + i + '' + j;
+                        buton.className = 'butoni';
+                        buton.innerHTML='<img src="../slike/karta.jpg" class="fotke"/>';
+                        buton.onclick = function() {
+                            var textIgracA = document.getElementById('igrac1text');
+                            var textIgracB = document.getElementById('igrac2text');
+                            var button1 = document.getElementById('button1');
+                            var button2 = document.getElementById('button2');
+                            var x = parseInt(this.id[0]);
+                            var y = parseInt(this.id[1]);
+                            if (naReduJe) {
+                                if (matVrijednosti[x][y] == 11) {
+                                    sumaIgracA += sumaIgracA;
+                                    this.innerHTML = '<img src="../slike/smjesko.jpg" class="fotke"/>';
+                                    setTimeout(() => {
+                                        this.innerHTML = '<img src="../slike/karta.jpg" class="fotke"/>';
+                                    }, 1000); 
+                                    matVrijednosti[x][y] = Math.floor(Math.random() * 10) + 1;
+                                    matbrojacaPonavljanja[x][y] = 0;
+                                    smjestiSmjeskailiLjutka(true);
+                                } else if (matVrijednosti[x][y] == 12) {
+                                    sumaIgracA = 0;
+                                    this.innerHTML = '<img src="../slike/ljutko.jpg" class="fotke"/>';
+                                    setTimeout(() => {
+                                        this.innerHTML = '<img src="../slike/karta.jpg" class="fotke"/>';
+                                    }, 1000);
+                                    matVrijednosti[x][y] = Math.floor(Math.random() * 10) + 1;
+                                    matbrojacaPonavljanja[x][y] = 0;
+                                    smjestiSmjeskailiLjutka(false);
+                                } else {
+                                    sumaIgracA += matVrijednosti[x][y];
+                                    this.innerHTML = matVrijednosti[x][y];
+                                    matbrojacaPonavljanja[x][y]++; 
+                                    if (matbrojacaPonavljanja[x][y] >= x + y) {
+                                        matVrijednosti[x][y] = Math.floor(Math.random() * 10) + 1;
+                                        matbrojacaPonavljanja[x][y] = 0; 
+                                    }
+                                    setTimeout(() => {
+                                        this.innerHTML = '<img src="../slike/karta.jpg" class="fotke"/>';
+                                    }, 1000);
+                                }
+                                naReduJe = !naReduJe;
+                                textIgracA.value = sumaIgracA;
+                                button1.style.backgroundColor='white';
+                                button2.style.backgroundColor='green';
+                            } else {
+                                if (matVrijednosti[x][y] == 11) {
+                                    sumaIgracB += sumaIgracB;
+                                    this.innerHTML = '<img src="../slike/smjesko.jpg" class="fotke"/>';
+                                    setTimeout(() => {
+                                        this.innerHTML = '<img src="../slike/karta.jpg" class="fotke"/>';
+                                    }, 1000);
+                                    matVrijednosti[x][y] = Math.floor(Math.random() * 10) + 1;
+                                    matbrojacaPonavljanja[x][y] = 0;
+                                    smjestiSmjeskailiLjutka(true);
+                                } else if (matVrijednosti[x][y] == 12) {
+                                    sumaIgracB = 0;
+                                    this.innerHTML = '<img src="../slike/ljutko.jpg" class="fotke"/>';
+                                    setTimeout(() => {
+                                        this.innerHTML = '<img src="../slike/karta.jpg" class="fotke"/>';
+                                    }, 1000);
+                                    matVrijednosti[x][y] = Math.floor(Math.random() * 10) + 1;
+                                    matbrojacaPonavljanja[x][y] = 0;
+                                    smjestiSmjeskailiLjutka(false);
+                                } else {
+                                    sumaIgracB += matVrijednosti[x][y];
+                                    this.innerHTML = matVrijednosti[x][y];
+                                    matbrojacaPonavljanja[x][y]++; 
+                                    if (matbrojacaPonavljanja[x][y] >= x + y) {
+                                        matVrijednosti[x][y] = Math.floor(Math.random() * 10) + 1;
+                                        matbrojacaPonavljanja[x][y] = 0; 
+                                    }
+                                    setTimeout(() => {
+                                        this.innerHTML = '<img src="../slike/karta.jpg" class="fotke"/>';
+                                    }, 1000);
+                                }
+                                naReduJe = !naReduJe;
+                                textIgracB.value = sumaIgracB;
+                                button1.style.backgroundColor='green';
+                                button2.style.backgroundColor='white';
+                            }
+                        };
+                        div.appendChild(buton); 
+                    }
+                }
+            }
+
+            function smjestiSmjeskailiLjutka(smjesko) {
+                if (smjesko) {
+                    while (true) {
+                        var i = Math.floor(Math.random() * 5);
+                        var j = Math.floor(Math.random() * 5);
+                        if (matVrijednosti[i][j] != 11 && matVrijednosti[i][j] != 12) {
+                            matVrijednosti[i][j] = 11;
+                            break;
+                        }
+                    }
+                } else {
+                    while (true) {
+                        var i = Math.floor(Math.random() * 5);
+                        var j = Math.floor(Math.random() * 5);
+                        if (matVrijednosti[i][j] != 11 && matVrijednosti[i][j] != 12) {
+                            matVrijednosti[i][j] = 12;
+                            break;
+                        }
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>

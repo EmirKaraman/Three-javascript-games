@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<canvas id="kanvas" width="500" height="500" style="border: 1px solid black;">
+		Vas pretrazivac ne podrzava kanvas
+	</canvas>
+	
+	<script type="text/javascript">
+		var canvas = document.getElementById('kanvas');
+		var ctx = canvas.getContext('2d');
+
+        var arr= [];
+
+        for (let i = 0; i < 10; i++) {
+            for (let j = 0; j< 10; j++) {
+                arr.push(new Kvadrat(i*50,j*50));   /* u prazan niz se dodaje 100 kvadrata jedan za drugim koji se redaju u kanvas i pomjeraju za navedene koordinate */
+            }
+        }
+
+        for (let j = 0; j< arr.length; j++) {
+                arr[j].crtajKvadrat();
+        }
+        
+		
+        function Kvadrat(x,y){          /* konstruktor za kvadrat */
+            this.x=x;
+            this.y=y;
+            this.w=50;              /*ovo se nece mijenjati pa je const */
+            this.h=50;
+            this.color='rgba(255,255,60,0.4)';  /* zuta boja sa alpha transparency od 0.4 */
+            this.free=true;  /* svaki kvadrat moze biti zauzet ako je neko vec kliknuo na njega */
+
+            this.crtajKvadrat = function (){
+                ctx.beginPath();
+                ctx.rect(this.x,this.y,this.w,this.h);  /* koristis this jer ti u ovu metodu stize objekat tipa Kvadrat cije se atribute smjestio u this objekat koji pripada ovoj vanjskoj funkciji */
+                ctx.stroke();   /* popuins border crnom bojom */
+                ctx.fillStyle= this.color;  /* pripremis boju contenta */
+                ctx.fill();     /* obojis cijeli content */
+            }
+        }
+
+        function getKvadratOdKlika(noviX,noviY){
+            for(let i=0;i<100;i++){
+                    if(arr[i].x == noviX && arr[i].y==noviY){
+                        return arr[i].free;
+                    }
+                }
+            return true;   /* ako nije pronadjen zauzet kvadrat vratit ce da je free = true */
+        }
+
+        function Robot(x,y,smijer){
+            this.x=x;
+            this.y=y;
+            this.smijer=smijer; /*gore dole desno lijevo, desnodole,desnogore, lijevodole,lijevogore*/
+
+            this.crtajRobota= function(){
+                var scope= this;
+                var slika = new Image();
+                slika.src="../slike/robot.png";
+                slika.onload= function(){       /* Prilikom loadovanja slike na DOM zelimo da se ta slika narta na tacno odredjenoj lokaciji, a to je ova lokacija x,y sto stigne u metodu i konstruktor */
+                    ctx.drawImage(slika,scope.x,scope.y,50,50);
+                }
+            }
+        }
+
+        function Dinosaur(x,y,smijer){
+            this.x=x;
+            this.y=y;
+            this.smijer=smijer; /*gore dole desno lijevo, desnodole,desnogore, lijevodole,lijevogore*/
+
+            this.crtajDinosaura = function(){
+                var scope= this;
+                var slika = new Image();
+                slika.src="../slike/dino.jpg";
+                slika.onload= function(){       /* Prilikom loadovanja slike na DOM zelimo da se ta slika narta na tacno odredjenoj lokaciji, a to je ova lokacija x,y sto stigne u metodu i konstruktor */
+                    ctx.drawImage(slika,scope.x,scope.y,50,50);
+                }
+            }
+        }
+
+        var robot=new Robot(200,200);   /*inicijalna pozicija robota*/
+        robot.crtajRobota();
+        var dinosaur=new Dinosaur(0,0);
+        dinosaur.crtajDinosaura();
+
+        var intervalD=setInterval(() => {
+            ocistiKanvas();
+            while(true){
+                putanja=Math.floor(Math.random() * 4); // 0-gore, 1-desno, 2 dole, 3 lijevo
+                if(putanja == 0){
+                    if(dinosaur.y-50>=0){
+                        dinosaur.y-=50;
+                        dinosaur.crtajDinosaura();
+                        break;
+                    } 
+                }
+                else if(putanja==1){
+                    if(dinosaur.x+50<=450){
+                        dinosaur.x+=50;
+                        dinosaur.crtajDinosaura();
+                        break;
+                    } 
+                }
+                else if(putanja == 2){
+                    if(dinosaur.y+50<=450){
+                        dinosaur.y+=50;
+                        dinosaur.crtajDinosaura();
+                        break;
+                    } 
+                }
+                else{
+                    if(dinosaur.x-50>=0){
+                        dinosaur.x-=50;
+                        dinosaur.crtajDinosaura();
+                        break;
+                    } 
+                }
+            }
+            robot.crtajRobota();
+            if(robot.x==dinosaur.x && robot.y==dinosaur.y){
+                var odgovor=confirm("Pojeso vas je dinosaur, zelite li ponovo bjezati od njega?");
+                if(odgovor){
+                    window.location.reload();
+                }else{
+                    window.location.href="pocetna.html";
+                }
+            }
+        }, 200);
+
+
+        canvas.addEventListener("mousedown", function(event){   /*kad pritisnes neku tacku na kanvasu poziva se ova funkcija koja prima taj dogadjaj koji sadrzi tacne koordinate te tacke */
+            var rect = canvas.getBoundingClientRect();
+            var x=event.clientX - rect.left;    /* u x se smjesta rezultat pozicioniranja x koordinate od misa u odnosu na kanvas */
+            var y=event.clientY - rect.top;
+            var noviX=x-(x%50);     /* centriranje, noviX dobija koordinate centra kvadrat u kojem je kliknut mis iako nije kliknut sami centar, dovest cemo se tu */
+            var noviY=y-(y%50);
+
+            /*posto je koordinata vrlo mala i moze biti u bilo kojem dijelu kvadrata na koji kliknes, potrebno je prvo da uzmes
+            koordinate sva 4 coska canvasa - prva linija sve */
+
+
+            /* poziv animacije za kretanje robota */
+            pomjeriRobotaDoTacke(noviX,noviY);
+        },false);
+
+        function pomjeriRobotaDoTacke(noviX,noviY){
+            /* provjera trenutne pozicije robota u odnosu na pristiglu */
+            if( robot.x != noviX || robot.y!=noviY){  /*ako je robot uopste pomjeren klikom */
+
+                if(noviX>robot.x && noviY==robot.y) robot.smijer="desno";
+                else if(noviX<robot.x && noviY==robot.y) robot.smijer="lijevo";
+                else if(noviX>robot.x && noviY>robot.y) robot.smijer="desnoDole";
+                else if(noviX>robot.x && noviY<robot.y) robot.smijer="desnoGore";
+                else if(noviX<robot.x && noviY>robot.y) robot.smijer="lijevoDole";
+                else if(noviX<robot.x && noviY<robot.y) robot.smijer="lijevoGore";
+                else if(noviX==robot.x && noviY>robot.y) robot.smijer="dole";
+                else if(noviX==robot.x && noviY<robot.y) robot.smijer="gore";
+                else robot.smijer="Ne postoji";
+
+                let slobodan = getKvadratOdKlika(noviX,noviY);
+                
+                if( robot.smijer !== "Ne postoji" && slobodan)    pozivIntervalaZaPomjeranjeRobota(noviX,noviY,robot.smijer);       /*metoda koja pomjera robota intervalima ukoliko postoji smijer i taj kvadrat je slobodan*/
+                else{
+                    alert("Kvadrat na koji ste kliknuli je zauzet!");
+                }
+            }
+        }
+
+        function pozivIntervalaZaPomjeranjeRobota(noviX,noviY,smijer){
+
+            if(smijer === "desno"){
+                var intervalx= setInterval(function(){
+                    ocistiKanvas();    /* svakih pola sekunde sav ovaj kod se ponavlja kao petlja neka i treba da brises proslu poziciju robota, da bi izgledalo kao da se robot pomjera */
+
+                    robot.x+=50;    /* svaka petlja kao i interval mora imati neki svoj brojac */
+                    robot.crtajRobota();
+                    dinosaur.crtajDinosaura();
+                    if(robot.x == noviX){    /* svaki put kad imas interval moras reci do kojeg momenta se izvrsava */
+                        zabraniPolje(noviX,noviY);
+                        clearInterval(intervalx);   /* ovdje se prekida intervalx */
+                    }
+                },250);
+            }
+
+            else if(smijer === "lijevo"){
+                var intervalx= setInterval(function(){
+                    ocistiKanvas();    
+
+                    robot.x-=50;    
+                    robot.crtajRobota();
+                    dinosaur.crtajDinosaura();
+                    if(robot.x == noviX){    
+                        zabraniPolje(noviX,noviY);
+                        clearInterval(intervalx);   
+                    }
+                },250);
+            }
+
+            else if(smijer === "dole"){
+                var intervaly= setInterval(function(){
+                    ocistiKanvas();   
+
+                    robot.y+=50;    
+                    robot.crtajRobota();
+                    dinosaur.crtajDinosaura();
+                    if(robot.y == noviY){    
+                        zabraniPolje(noviX,noviY);
+                        clearInterval(intervaly);   
+                    }
+                },250);
+            }
+
+            else if(smijer === "gore"){
+                var intervaly= setInterval(function(){
+                    ocistiKanvas();    
+
+                    robot.y-=50;    
+                    robot.crtajRobota();
+                    dinosaur.crtajDinosaura();
+                    if(robot.y == noviY){    
+                        zabraniPolje(noviX,noviY);
+                        clearInterval(intervaly);  
+                    }
+                },250);
+            }
+
+            else if(smijer === "desnoDole"){
+                var intervalx= setInterval(function(){
+                    ocistiKanvas();   
+
+                    robot.x+=50;   
+                    robot.crtajRobota();
+                    dinosaur.crtajDinosaura();
+                    if(robot.x == noviX){   
+                        clearInterval(intervalx);  
+
+                        var intervaly= setInterval(function(){  /* nakon sto si pomjerio po x osi mozes da pomjeris robota po y osi ako je potrebno */
+                            ocistiKanvas();
+
+                            robot.y+=50;
+                            robot.crtajRobota();
+                            dinosaur.crtajDinosaura();
+                            if(robot.y==noviY){
+                                zabraniPolje(noviX,noviY);
+                                clearInterval(intervaly); 
+                            }
+
+                        },250);
+                    }
+                },250);         
+            }
+
+            else if(smijer === "desnoGore"){
+                var intervalx= setInterval(function(){
+                    ocistiKanvas();   
+
+                    robot.x+=50;   
+                    robot.crtajRobota();
+                    dinosaur.crtajDinosaura();
+                    if(robot.x == noviX){   
+                        clearInterval(intervalx);  
+
+                        var intervaly= setInterval(function(){  /* nakon sto si pomjerio po x osi mozes da pomjeris robota po y osi ako je potrebno */
+                            ocistiKanvas();
+
+                            robot.y-=50;
+                            robot.crtajRobota();
+                            dinosaur.crtajDinosaura();
+                            if(robot.y==noviY){
+                                zabraniPolje(noviX,noviY);
+                                clearInterval(intervaly); 
+                            }
+
+                        },250);
+                    }
+                },250);         
+            }
+
+            else if(smijer === "lijevoDole"){
+                var intervalx= setInterval(function(){
+                    ocistiKanvas();   
+
+                    robot.x-=50;   
+                    robot.crtajRobota();
+                    dinosaur.crtajDinosaura();
+                    if(robot.x == noviX){   
+                        clearInterval(intervalx);  
+
+                        var intervaly= setInterval(function(){  /* nakon sto si pomjerio po x osi mozes da pomjeris robota po y osi ako je potrebno */
+                            ocistiKanvas();
+
+                            robot.y+=50;
+                            robot.crtajRobota();
+                            dinosaur.crtajDinosaura();
+                            if(robot.y==noviY){
+                                zabraniPolje(noviX,noviY);
+                                clearInterval(intervaly); 
+                            }
+
+                        },250);
+                    }
+                },250);         
+            }
+
+            else{
+                var intervalx= setInterval(function(){
+                    ocistiKanvas();   
+
+                    robot.x-=50;   
+                    robot.crtajRobota();
+                    dinosaur.crtajDinosaura();
+                    if(robot.x == noviX){   
+                        clearInterval(intervalx);  
+
+                        var intervaly= setInterval(function(){  /* nakon sto si pomjerio po x osi mozes da pomjeris robota po y osi ako je potrebno */
+                            ocistiKanvas();
+
+                            robot.y-=50;
+                            robot.crtajRobota();
+                            dinosaur.crtajDinosaura();
+                            if(robot.y==noviY){
+                                zabraniPolje(noviX,noviY);
+                                clearInterval(intervaly); 
+                            }
+
+                        },250);
+                    }
+                },250);         
+            }
+
+        }
+
+        /*zabrana kliknutog polja*/
+        function zabraniPolje(noviX,noviY){
+            /*potrebno je sad zabraniti trenutno kliknuto polje*/
+            for(let i=0;i<100;i++){
+                    if(arr[i].x == noviX && arr[i].y==noviY){
+                        arr[i].free=false;
+                        arr[i].color='rgba(207,37,46,0.4)';
+                        break;
+                    }
+                }
+        }
+
+
+        function ocistiKanvas(){
+            ctx.clearRect(0,0,500,500);
+            for (let j = 0; j< arr.length; j++) {
+                arr[j].crtajKvadrat();
+            }
+        }   /* prilikom ciscenja kanvasa, kreiras novi prazan kanvas i popunis ga sa onih 100 kvadrata */
+
+
+		
+	</script>
+</body>
+</html>

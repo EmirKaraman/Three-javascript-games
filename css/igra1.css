@@ -1,0 +1,31 @@
+#verzija1body {
+	background: url("../slike/slika1.jpg");
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+#kanvas {
+	margin-top: 100px;
+	border: 1px solid black;
+	background-color: #141626;
+	padding-left: 0;
+	padding-right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+
+#alert {
+	margin-top: 5px;
+	margin-bottom: 50px;
+	width: 850px;
+	height: 70px;
+	text-align: center;
+	font-size: 40px;
+	font-weight: 500;
+	border-radius: 10px;
+	padding-left: 0;
+	padding-right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}

@@ -1,0 +1,40 @@
+#verzija1body {
+	background: url("../slike/slika1.jpg");
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+.pocetnadiv {
+	margin: 200px auto 100px;
+	background: lightyellow;
+	border-radius: 70px;
+	width: 340px;
+	padding-top: 10px;
+	height: 350px;
+}
+.pocetnadiv h1 {
+	margin-top: 20px;
+	color: darkmagenta;
+}
+#grupa {
+	margin: 20px auto 50px;
+	width: 90%;
+	height: 70%;
+}
+.opcije {
+	width: 60%;
+	margin-left: 4rem;
+}
+h4 {
+	width: 80%;
+}
+.igraj {
+	width: 40%;
+}
+.dodatnibutoni {
+	width: 10em;
+	margin: 0.3rem auto;
+}
+h4 {
+	margin-left: auto;
+	margin-right: auto;
+}

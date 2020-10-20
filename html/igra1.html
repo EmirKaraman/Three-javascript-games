@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Emir Karaman Triba</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="../css/igra1.css">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    </head>
+    <body id="verzija1body" class="container-fluid">
+        <canvas id="kanvas" width="850" height="600">
+            Vas pretrazivac ne podrzava kanvas
+        </canvas>
+        <div id="alert"></div>
+
+        <script>
+            var canvas = document.getElementById('kanvas');
+            var ctx = canvas.getContext('2d');
+            var alertDiv=document.getElementById('alert');
+            alertDiv.style.display="none";
+            var nizKrugova = [], nizNacrtanihDuzi= [];
+            var brojKlikovaMisem=3, red;      
+
+            kreiranjeTablekrugova();
+
+            function Pravougaonik(x, y, color) {
+                /* konstruktor za pravougaonik */
+                this.x = x;
+                this.y = y;
+                this.w = 5;
+                this.h = 500;
+                this.color = color;
+
+                this.crtajPravougaonik = function() {
+                    ctx.beginPath();
+                    ctx.rect(this.x, this.y, this.w, this.h);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                };
+            }
+            function generisanjeDvaPravougaonika(color){
+                var desniPravougaonik = new Pravougaonik(815, 50, color);
+                var lijeviPravougaonik = new Pravougaonik(30, 50, color);
+                desniPravougaonik.crtajPravougaonik();
+                lijeviPravougaonik.crtajPravougaonik();
+            }
+
+            function Krug(x,y){
+                this.x = x;
+                this.y = y;
+                this.r = 12.5;
+                this.color = 'lightgray';
+                this.crtrajKrug = function(){
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.r, 0, 2*Math.PI);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                }   
+            }
+            
+            function kreiranjeTablekrugova(){
+                for(let i=0;i<10;i++){
+                    for(let j=0;j<8;j++){
+                        nizKrugova.push(new Krug(i*50+200,j*50+100));
+                    }
+                }
+                for(let i=0;i<nizKrugova.length;i++) nizKrugova[i].crtrajKrug();
+                if(Math.floor(Math.random() * 2)==0){
+                    generisanjeDvaPravougaonika('coral');   red=true;
+                }
+                else{
+                    generisanjeDvaPravougaonika('aqua');    red=false;
+                }
+            }
+
+            function Duz(x1,y1,x2,y2) {
+                this.x1=x1;
+                this.x2=x2;
+                this.y1=y1;
+                this.y2=y2;
+            }
+            
+            setInterval(function(){ 
+                let nizSlobodnihKrugova=[];
+                for(let i=0;i<nizKrugova.length;i++)
+                    if(nizKrugova[i].color=='lightgray') nizSlobodnihKrugova.push(nizKrugova[i]);
+                let pobjeda3=true;                      /*pretpostavim pobjedu */
+                for(let i=0;i<nizSlobodnihKrugova.length-2;i++){
+                    for(let j=i+1;j<nizSlobodnihKrugova.length-1;j++){
+                        for(let k=j+1;k<nizSlobodnihKrugova.length;k++){
+                            let sijece=false;
+                            if(kolinearneTacke(nizSlobodnihKrugova[i].x+12.5,nizSlobodnihKrugova[i].y+12.5,
+                                            nizSlobodnihKrugova[j].x+12.5,nizSlobodnihKrugova[j].y+12.5,
+                                            nizSlobodnihKrugova[k].x+12.5,nizSlobodnihKrugova[k].y+12.5))
+                                sijece=true;  
+                            else{
+                                for(let l=0;l<3;l++)
+                                {
+                                    if(l==0){
+                                        x1=nizSlobodnihKrugova[i].x+12.5;   y1=nizSlobodnihKrugova[i].y+12.5;
+                                        x2=nizSlobodnihKrugova[j].x+12.5;   y2=nizSlobodnihKrugova[j].y+12.5;
+                                    }
+                                    else if(l==1){
+                                        x1=nizSlobodnihKrugova[j].x+12.5;   y1=nizSlobodnihKrugova[j].y+12.5;
+                                        x2=nizSlobodnihKrugova[k].x+12.5;   y2=nizSlobodnihKrugova[k].y+12.5;
+                                    }
+                                    else {
+                                        x1=nizSlobodnihKrugova[k].x+12.5;   y1=nizSlobodnihKrugova[k].y+12.5;
+                                        x2=nizSlobodnihKrugova[i].x+12.5;   y2=nizSlobodnihKrugova[i].y+12.5;
+                                    }
+                                    /* sad ove tri duzi poredim sa duzima svakog postojeceg trougla u nizu trouglova*/
+                                    for(let m=0;m<nizNacrtanihDuzi.length;m++){
+                                        if(lineSegmentsIntersect(x1,y1,x2,y2,nizNacrtanihDuzi[m].x1,nizNacrtanihDuzi[m].y1,nizNacrtanihDuzi[m].x2,nizNacrtanihDuzi[m].y2)){
+                                            sijece=true;
+                                            break; 
+                                        }
+                                    }  
+                                }
+                            }
+                            if(!sijece){      
+                                pobjeda3=false;
+                                break;
+                            }
+                        }
+                        if(!pobjeda3) break;
+                    }
+                    if(!pobjeda3) break;
+                }
+
+                if(pobjeda3){
+                    podesiAlertDivZaPobjedu();
+                        setTimeout(function() {    
+                        if (confirm("Zelite li ponovo da igrate?"))     window.location.reload(); 
+                        else                                            window.location.replace("pocetna.html");
+                    }, 500);       
+                }
+            }, 1000);
+
+            function podesiAlertDivZaPobjedu(){
+                alertDiv.style.background="#cf8484";
+                alertDiv.style.color="#4f0621";
+                alertDiv.style.display="block";
+                if(!red)    alertDiv.innerHTML="pobijedio je: Igrac A   -   Narandzasta boja!"; 
+                else    alertDiv.innerHTML="pobijedio je: Igrac B   -   Plava boja!";
+            }
+
+            var pom1x,pom2x,pom3x,pom1y,pom2y,pom3y,pomcolor1,pomcolor2,dioTableSaKrugovima=true;
+
+            canvas.addEventListener("mousedown", function(event){
+                if(brojKlikovaMisem%3===0)
+                    dioTableSaKrugovima=true;    
+                brojKlikovaMisem++;
+                var rect = canvas.getBoundingClientRect();
+                var noviX=event.clientX - rect.left;    
+                var noviY=event.clientY - rect.top;
+
+                if(brojKlikovaMisem%3!==0){
+                    if(brojKlikovaMisem%3===1){
+                            if(noviX<175 || noviX>675 || noviY<75 || noviY>475)
+                                dioTableSaKrugovima=false;
+                            pom1x=centriraj(noviX);   pom1y=centriraj(noviY);
+                            for(let i=0;i<nizKrugova.length;i++){
+                                if(pom1x==nizKrugova[i].x && pom1y==nizKrugova[i].y){
+                                    pomcolor1=nizKrugova[i].color;
+                                    bojenjeTackiPredCrtanje(nizKrugova[i].x, nizKrugova[i].y);
+                                    break;
+                                }
+                            }
+                        }
+                    else if(brojKlikovaMisem%3===2){
+                        if(noviX<175 || noviX>675 || noviY<75 || noviY>475)
+                            dioTableSaKrugovima=false;
+                        pom2x=centriraj(noviX);   pom2y=centriraj(noviY);
+                        for(let i=0;i<nizKrugova.length;i++){
+                            if(pom2x==nizKrugova[i].x && pom2y==nizKrugova[i].y){
+                                pomcolor2=nizKrugova[i].color;
+                                bojenjeTackiPredCrtanje(nizKrugova[i].x, nizKrugova[i].y);
+                                break;
+                            }
+                        }
+                    }
+                }
+                else{   
+                    if(noviX<175 || noviX>675 || noviY<75 || noviY>475)
+                        dioTableSaKrugovima=false;
+                    let bojenje1=false,bojenje2=false;
+                    pom3x=centriraj(noviX);   pom3y=centriraj(noviY);
+
+                    for(let i=0;i<nizKrugova.length;i++){
+                        if(pom1x==nizKrugova[i].x && pom1y==nizKrugova[i].y){
+                            ctx.beginPath();
+                            ctx.arc(nizKrugova[i].x, nizKrugova[i].y, nizKrugova[i].r, 0, 2*Math.PI);
+                            ctx.fillStyle = pomcolor1;
+                            ctx.fill();
+                            bojenje1=true;
+                        }
+                        if(pom2x==nizKrugova[i].x && pom2y==nizKrugova[i].y){
+                            ctx.beginPath();
+                            ctx.arc(nizKrugova[i].x, nizKrugova[i].y, nizKrugova[i].r, 0, 2*Math.PI);
+                            ctx.fillStyle = pomcolor2;
+                            ctx.fill();
+                            bojenje2=true;
+                        }
+                        if(bojenje1 && bojenje2) break;
+                    }
+                    if(dioTableSaKrugovima==true)          
+                    {          
+                        let nijedanpresjek=true;
+                        let x1,x2,y1,y2;
+                        for(let i=0;i<3;i++){
+                            if(i==0){
+                                x1=pom1x;  y1=pom1y;
+                                x2=pom2x;  y2=pom2y;
+                            }
+                            else if(i==1){
+                                x1=pom2x;  y1=pom2y;
+                                x2=pom3x;  y2=pom3y;
+                            }
+                            else{
+                                x1=pom3x;  y1=pom3y;
+                                x2=pom1x;  y2=pom1y;
+                            }
+                            for(let j=0;j<nizNacrtanihDuzi.length;j++){
+                                if(lineSegmentsIntersect(x1,y1,x2,y2,nizNacrtanihDuzi[j].x1,nizNacrtanihDuzi[j].y1,nizNacrtanihDuzi[j].x2,nizNacrtanihDuzi[j].y2)){
+                                    nijedanpresjek=false;
+                                    break;
+                                }
+                            }
+                            if(!nijedanpresjek)  break;
+                        }
+                        if(kolinearneTacke(pom1x,pom1y,pom2x,pom2y,pom3x,pom3y)) {
+                            nijedanpresjek=false;
+                        }
+                        // ovdjeeeeeeeeeeeeeeeeeeeee
+                        for(let i=0;i<nizKrugova.length;i++){
+                            if(pom1x==nizKrugova[i].x && pom1y==nizKrugova[i].y)
+                                if(nizKrugova[i].color!='lightgray'){
+                                    nijedanpresjek=false;   break;
+                                }
+                            if(pom2x==nizKrugova[i].x && pom2y==nizKrugova[i].y)
+                                if(nizKrugova[i].color!='lightgray'){
+                                    nijedanpresjek=false;   break;
+                                }
+                            if(pom3x==nizKrugova[i].x && pom3y==nizKrugova[i].y)
+                                if(nizKrugova[i].color!='lightgray'){
+                                    nijedanpresjek=false;   break;
+                                }
+                        }
+                        if(nijedanpresjek)   
+                        {
+                            alertDiv.style.display="none";
+                            for(let i=0;i<nizKrugova.length;i++){
+                                if(tackaJeIzmedjuDrugeDvije(pom1x,pom1y,pom2x,pom2y,nizKrugova[i].x,nizKrugova[i].y) 
+                                    || tackaJeIzmedjuDrugeDvije(pom2x,pom2y,pom3x,pom3y,nizKrugova[i].x,nizKrugova[i].y)
+                                    || tackaJeIzmedjuDrugeDvije(pom3x,pom3y,pom1x,pom1y,nizKrugova[i].x,nizKrugova[i].y)){
+                                    bojenjePripadnihTacki(nizKrugova[i].x, nizKrugova[i].y);
+                                    if(red)     nizKrugova[i].color = 'coral';
+                                    else        nizKrugova[i].color = 'aqua';
+                                }
+                            }
+                            ctx.beginPath();
+                            ctx.moveTo(pom1x, pom1y);
+                            ctx.lineTo(pom2x, pom2y);
+                            ctx.lineTo(pom3x, pom3y);
+                            ctx.closePath();
+                            ctx.lineWidth = 3;
+                            if(red)     ctx.strokeStyle = 'coral';
+                            else        ctx.strokeStyle= 'aqua';
+                            ctx.stroke();
+                            red=!red;    
+                            if(red)     generisanjeDvaPravougaonika("coral");
+                            else        generisanjeDvaPravougaonika("aqua");
+                            nizNacrtanihDuzi.push(new Duz(pom1x,pom1y,pom2x,pom2y));
+                            nizNacrtanihDuzi.push(new Duz(pom2x,pom2y,pom3x,pom3y));
+                            nizNacrtanihDuzi.push(new Duz(pom3x,pom3y,pom1x,pom1y));
+                        }
+                        else{
+                            alertDiv.innerHTML="Nije moguce iscrtati ovaj trokut!!"
+                            podesiAlerteZaGresku()
+                        }
+                    }
+                    else{
+                        alertDiv.innerHTML="Molim vas da kliknete na krugove!!";
+                        podesiAlerteZaGresku()
+                    }       
+                }
+            },false);
+
+            function daLiJeTackaObojena(x,y){
+
+            }
+
+            function podesiAlerteZaGresku(){
+                alertDiv.style.background="#cf8484";
+                alertDiv.style.color="#4f0621";
+                alertDiv.style.display="block";
+            }
+
+            function udaljenostDvijeTacke(x1,y1,x2,y2){
+                return Math.sqrt((x1 - x2)**2 + (y1 - y2)**2);
+            }
+
+            function tackaJeIzmedjuDrugeDvije(x1,y1,x2,y2,x3,y3){
+                d1=udaljenostDvijeTacke(x1,y1,x3,y3);
+                d2=udaljenostDvijeTacke(x3,y3,x2,y2);
+                d3=udaljenostDvijeTacke(x1,y1,x2,y2);
+                return d1+d2>=d3 && d1+d2<=d3+0.5;
+            }
+
+            function centriraj(tacka){
+                if( tacka%50 <25)
+                    return tacka-(tacka%50);
+                else
+                    return tacka+50-(tacka%50);
+            }
+
+            function bojenjePripadnihTacki(kx,ky){
+                ctx.beginPath();
+                ctx.arc(kx, ky, 12.5, 0, 2*Math.PI);
+                let bojaKruga;
+                if(red) bojaKruga  = 'red'; 
+                else    bojaKruga  = 'blue';   
+                ctx.fillStyle = bojaKruga;
+                ctx.fill();
+            }
+
+            function bojenjeTackiPredCrtanje(kx,ky){
+                ctx.beginPath();
+                ctx.arc(kx, ky, 12.5, 0, 2*Math.PI);
+                let bojaKruga;
+                if(red) bojaKruga  = '#de5964';
+                else    bojaKruga  = '#55aad4';   
+                ctx.fillStyle = bojaKruga;
+                ctx.fill();
+            }
+
+            function kolinearneTacke(x1,y1,x2,y2,x3,y3) {
+                return (y1 - y2) * (x1 - x3) == (y1 - y3) * (x1 - x2);
+            }
+
+            var lineSegmentsIntersect = (x1, y1, x2, y2, x3, y3, x4, y4)=> {
+                var a_dx = x2 - x1;
+                var a_dy = y2 - y1;
+                var b_dx = x4 - x3;
+                var b_dy = y4 - y3;
+                var s = (-a_dy * (x1 - x3) + a_dx * (y1 - y3)) / (-b_dx * a_dy + a_dx * b_dy);
+                var t = (+b_dx * (y1 - y3) - b_dy * (x1 - x3)) / (-b_dx * a_dy + a_dx * b_dy);
+                return (s >= 0 && s <= 1 && t >= 0 && t <= 1);
+            }
+        </script>
+    </body>
+</html>

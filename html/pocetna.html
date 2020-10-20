@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Emir Karaman Triba</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+        <link rel="stylesheet" type="text/css" href="../css/pocetna.css">
+        <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        
+    </head>
+    <body id="verzija1body">
+        <div class="pocetnadiv">
+            <h1 class="text-center mt-2 mb-2">MOJE IGRE</h1>
+            <div id="grupa" class="d-flex flex-column">
+                <div>
+                    <div class="d-flex flex-column">
+                        <div class="d-flex flex-row justify-content-around opcije mb-1">
+                            <h4>TRIBA</h4>
+                            <button id="igra1.html" class="igraj btn btn-warning rounded-pill" onclick="funkcijaZaButone(this.id)">
+                                IGRAJ
+                            </button>
+                        </div>
+                        <div class="d-flex flex-row justify-content-around opcije mb-1">
+                            <h4>CARDS</h4>
+                            <button id="igra2.html" class="igraj btn btn-warning rounded-pill" onclick="funkcijaZaButone(this.id)">
+                                IGRAJ
+                            </button>
+                        </div>
+                        <div class="d-flex flex-row justify-content-around opcije mb-1">
+                            <h4>ROBOT</h4>
+                            <button id="igra3.html" class="igraj btn btn-warning rounded-pill" onclick="funkcijaZaButone(this.id)">
+                                IGRAJ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="text-center mb-3 mt-3">DODATNE OPCIJE</h3>
+                <div class="text-center">
+                    <button id="upute.html" class="btn btn-primary rounded-pill dodatnibutoni" onclick="funkcijaZaButone(this.id)">
+                        UPUTE
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            function funkcijaZaButone(link){
+                window.location.href=link;
+            }
+        </script>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>   
+    </body>
+</html>
